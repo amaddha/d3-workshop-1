@@ -24,7 +24,15 @@ function makeJerry(jerry){
                 4. Style the squares
                     Hint: row is an array of rgb strings, which are valid values for the fill property in css.
                     */
-    })
+            .data(row)
+            .enter()
+            .append('rect')
+            .attr('width', square_width)
+            .attr('height', square_height)
+            .attr('x', (d, j) => j * square_width)
+            .attr('y', i * square_height)
+            .attr('fill', d => d);
+    });
     
 }
 
