@@ -1,5 +1,6 @@
 .axis text {
     fill: #555;
+    font-size: 12px;
 }
 
 .axis line,
@@ -8,20 +9,17 @@
 }
 
 .dot {
-    /* TODO: Style the dot class 
-        1. change the fill color of the dot
-        2. (option) change the outline color of the dot */
+    fill: #4682B4;
+    stroke: #000;
 }
 
 .title {
-    /* TODO: Style the title class 
-        1. anchor the title in the middle
-        2. give the title 18pt font
-        3. make the title bold      */
+    text-anchor: middle;
+    font-size: 18pt;
+    font-weight: bold;
 }
 
 .axis-label {
-    /* TODO: Style the axis-label class
-        1. anchor the title in the middle
-        2. give the title 14pt font */
+    text-anchor: middle;
+    font-size: 14pt;
 }

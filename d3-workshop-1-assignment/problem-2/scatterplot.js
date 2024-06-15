@@ -1,32 +1,30 @@
-const container_id = ''; // TODO: Set container_id to the id you gave to the div in problem-2/index.html 
+const container_id = 'scatterplot'; 
 const width = 600, height = 400;
 const margin = {
     top: 50,
     bottom: 50,
-    left: 50,
+    left: 100,
     right: 50
 }
 
-const title_x_position = margin.left + (width-(margin.left+margin.right))/2;
+const title_x_position = margin.left + (width - (margin.left + margin.right)) / 2;
 const title_y_position = margin.top;
 
-const x_axis_x_position = margin.left + (width-(margin.left+margin.right))/2;
-const x_axis_y_position = height - margin.bottom/2;
+const x_axis_x_position = margin.left + (width - (margin.left + margin.right)) / 2;
+const x_axis_y_position = height - margin.bottom /3;
 
-const y_axis_x_position = margin.left/2;
-const y_axis_y_position = margin.top + (height-(margin.top+margin.bottom))/2;
-
+const y_axis_x_position = margin.left / 3;
+const y_axis_y_position = margin.top + (height - (margin.top + margin.bottom)) / 2;
 
 const xScale = d3.scaleLinear().domain([-1e8, 1.8e9]).range([0, width - (margin.left + margin.right)]);
-
 const yScale = d3.scaleLinear().domain([-1e8, 1.2e9]).range([height - (margin.top + margin.bottom), 0]);
 
 const abbreviateNumber = function(num) {
-    if (num / 1e9 >= 1) 
-        return '$' + (num/1e9) + 'B';
-    else if (num / 1e6 >= 1) 
-        return '$' + (num/1e6) + 'M';
-    else 
+    if (num / 1e9 >= 1)
+        return '$' + (num / 1e9) + 'B';
+    else if (num / 1e6 >= 1)
+        return '$' + (num / 1e6) + 'M';
+    else
         return '$' + num;
 }
 
@@ -45,45 +43,70 @@ function drawYAxis(svg) {
 }
 
 function drawDots(svg, data) {
-    /* TODO:
-        1. Append a group to the svg
-        2. Translate this group margin.left pixels in the x direction and margin.top in the y direction
-        3. Within this group, create a selection of all elements with class "dot"
-        3. Bind the data array to the selection
-        4. Use enter() and append() to create a dot for each of the elements in the data array
-        5. Set the necessary attributes for the dots
-            Hint: The scatter plot's x axis represents the museum's Income property 
-            Hint: The scatter plot's y axis represents the museum's Revenue property
-            Hint: The dots should all be the same size
-        6. Set the dot class to "dot"                                                           */
+    const dotGroup = svg.append('g')
+        .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+    dotGroup.selectAll('.dot')
+        .data(data)
+        .enter().append('circle')
+        .attr('class', 'dot')
+        .attr('cx', d => xScale(d.Income))
+        .attr('cy', d => yScale(d.Revenue))
+        .attr('r', 5);
+
+    dotGroup.selectAll('.dot')
+        .style('fill', '#4682B4')
+        .style('stroke', '#fff');
 }
 
-function filterMuseums(d){
-    /* TODO: Filter the data to only include natural history museums 
-                Hint: the data has a "Museum Type" property                                     */
+function filterMuseums(data) {
+    return data.filter(d => d['Museum Type'] === 'NATURAL HISTORY MUSEUM');
 }
 
 function drawScatterPlot(data) {
     let svg = d3.select('#' + container_id)
-                .append('svg')
-                    /* TODO: Set the width and height of the svg                                */
-                    ;
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
 
-    /* TODO: 
-        1. Call the drawDots, drawXAxis, and drawYAxis function with the appropriate parameters
-        2. Add a title to the visualization
-            a. The title should have the class "title"
-        3. Add x and y axis labels to the visualization
-            a. The axis labels should have the class "axis-label"
-            b. The y axis should be rotated counter-clockwise 90 degrees                        */
+    drawXAxis(svg);
+    drawYAxis(svg);
+    drawDots(svg, data);
 
+    svg.append('text')
+        .attr('class', 'title')
+        .attr('x', title_x_position)
+        .attr('y', title_y_position)
+        .text('Museum Income vs Revenue');
+
+    svg.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', x_axis_x_position)
+        .attr('y', x_axis_y_position)
+        .text('Income');
+
+    svg.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', y_axis_x_position)
+        .attr('y', y_axis_y_position)
+        .attr('transform', `rotate(-90, ${y_axis_x_position}, ${y_axis_y_position})`)
+        .text('Revenue');
 }
 
-function main(){
-    /* TODO: 
-        1. Load the museums_edited.csv file from the data/ directory
-        2. Filter the data 
-        2. then call drawScatterPlot with the resulting data */
+function main() {
+    d3.csv('data/museums_edited.csv').then(data => {
+        const filteredData = filterMuseums(data);
+
+        filteredData.forEach(d => {
+            d.Income = +d.Income;
+            d.Revenue = +d.Revenue;
+        });
+
+        xScale.domain(d3.extent(filteredData, d => d.Income)).nice();
+        yScale.domain(d3.extent(filteredData, d => d.Revenue)).nice();
+
+        drawScatterPlot(filteredData);
+    });
 }
 
 main();
